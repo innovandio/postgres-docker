@@ -26,6 +26,9 @@ RUN mkdir -p "$PGDATA" /var/run/postgresql /docker-entrypoint-initdb.d \
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=30s \
+    CMD pg_isready -U postgres || exit 1
+
 STOPSIGNAL SIGINT
 VOLUME /var/lib/postgresql/data
 EXPOSE 5432
