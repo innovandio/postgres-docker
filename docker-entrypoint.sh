@@ -5,7 +5,6 @@ set -Eeo pipefail
 # https://github.com/docker-library/postgres/blob/master/docker-entrypoint.sh
 #
 # Changes from the official version:
-# - Uses su-exec instead of gosu (Alpine)
 # - Simplified PGDATA handling (no PG18 migration logic)
 
 file_env() {
@@ -233,7 +232,7 @@ _main() {
 		docker_setup_env
 		docker_create_db_directories
 		if [ "$(id -u)" = '0' ]; then
-			exec su-exec postgres "$BASH_SOURCE" "$@"
+			exec gosu postgres "$BASH_SOURCE" "$@"
 		fi
 
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then

@@ -1,28 +1,32 @@
-FROM alpine:3.22
+FROM debian:trixie-slim
 
-RUN apk add --no-cache \
-      postgresql18 \
-      postgresql18-contrib \
-      postgresql18-jit \
-      postgis \
-      pgvector \
-      su-exec \
-      bash \
-      tzdata \
-    && mkdir -p /var/lib/postgresql/data /var/run/postgresql /docker-entrypoint-initdb.d \
-    && chown -R postgres:postgres /var/lib/postgresql /var/run/postgresql /docker-entrypoint-initdb.d
-
-ENV LANG=en_US.utf8
-ENV PG_MAJOR=18
+ENV PG_VERSION=18
+ENV DEBIAN_FRONTEND=noninteractive
 ENV PGDATA=/var/lib/postgresql/data
+ENV PATH="/usr/lib/postgresql/${PG_VERSION}/bin:$PATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates gnupg \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+      | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] \
+      http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" \
+      > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+      postgresql-${PG_VERSION} \
+      postgresql-${PG_VERSION}-postgis-3 \
+      postgresql-${PG_VERSION}-postgis-3-scripts \
+      postgresql-${PG_VERSION}-pgvector \
+      gosu \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p "$PGDATA" /var/run/postgresql /docker-entrypoint-initdb.d \
+    && chown -R postgres:postgres "$PGDATA" /var/run/postgresql /docker-entrypoint-initdb.d
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 STOPSIGNAL SIGINT
-
-USER postgres
-
 VOLUME /var/lib/postgresql/data
 EXPOSE 5432
 
