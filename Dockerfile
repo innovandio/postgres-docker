@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       postgresql-${PG_VERSION}-postgis-3 \
       postgresql-${PG_VERSION}-postgis-3-scripts \
       postgresql-${PG_VERSION}-pgvector \
+      postgresql-${PG_VERSION}-partman \
       gosu \
     && rm -rf /var/lib/apt/lists/*
 
