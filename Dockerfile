@@ -5,11 +5,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PGDATA=/var/lib/postgresql/data
 ENV PATH="/usr/lib/postgresql/${PG_VERSION}/bin:$PATH"
 
+# Fetched by BuildKit on the build host instead of curl inside the (possibly QEMU-emulated) build
+ADD --chmod=644 https://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc /usr/share/keyrings/postgresql.asc
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      curl ca-certificates gnupg \
-    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-      | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] \
+      curl ca-certificates \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.asc] \
       http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" \
       > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update && apt-get install -y --no-install-recommends \
